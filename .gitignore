@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+.trainenv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Model files (uncomment if you want to exclude them from Git)
+# app/models/*.pt
+# app/models/*.onnx
+
+# Dataset files
+dataset/
+runs/
+
+# Environment variables
+.env
+.env.local
+

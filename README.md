@@ -153,6 +153,93 @@ The API returns JSON with this structure:
 }
 ```
 
+## Deployment to Railway
+
+Railway is an excellent platform for deploying this app because it supports long-running processes, large dependencies, and ML models.
+
+### Prerequisites
+
+1. A [Railway account](https://railway.app) (free tier available)
+2. Your trained YOLO model at `app/models/yolov8n-plates.pt`
+3. Git repository (GitHub, GitLab, etc.)
+
+### Deployment Steps
+
+#### Option 1: Deploy from GitHub (Recommended)
+
+1. **Push your code to GitHub** (make sure `app/models/yolov8n-plates.pt` is included or use Railway's file system)
+
+2. **Create a new Railway project:**
+   - Go to [railway.app](https://railway.app)
+   - Click "New Project"
+   - Select "Deploy from GitHub repo"
+   - Choose your repository
+
+3. **Configure the service:**
+   - Railway will auto-detect Python and use the `Procfile`
+   - The app will automatically start on port `$PORT` (Railway sets this)
+
+4. **Add environment variables** (optional):
+   - `PLATE_WEB_SEARCH_ENABLED=1` - Enable web search feature
+   - Railway automatically sets `PORT` - don't override it
+
+5. **Upload model files** (if not in Git):
+   - Go to your service → "Settings" → "Volumes"
+   - Or use Railway CLI to upload files:
+     ```bash
+     railway login
+     railway link
+     railway up app/models/yolov8n-plates.pt
+     ```
+
+6. **Deploy:**
+   - Railway will automatically build and deploy
+   - Check the "Deployments" tab for logs
+   - Your app will be live at `https://your-app-name.up.railway.app`
+
+#### Option 2: Deploy with Docker
+
+If you prefer Docker:
+
+1. **Build and push to a container registry** (or let Railway build it):
+   ```bash
+   docker build -t your-username/alpr-app .
+   ```
+
+2. **Deploy on Railway:**
+   - Create new project → "Deploy from Docker Hub" or "Deploy from GitHub" (Railway will build from Dockerfile)
+
+3. **Configure volumes** for model files if needed
+
+### Important Notes for Railway
+
+- **Model files**: If your YOLO model is large (>50MB), consider:
+  - Using Railway's persistent volumes
+  - Storing models in cloud storage (S3, Cloudflare R2) and downloading on startup
+  - Including in Git if under size limits
+
+- **Memory**: Railway free tier has memory limits. If you hit limits:
+  - Upgrade to a paid plan
+  - Use lighter models (YOLOv8n is already lightweight)
+  - Optimize EasyOCR loading
+
+- **Cold starts**: First request may be slow as models load. Subsequent requests will be fast.
+
+- **Logs**: Check Railway dashboard → "Deployments" → "View Logs" for debugging
+
+### Verifying Deployment
+
+Once deployed, test your API:
+
+```bash
+curl -X POST "https://your-app-name.up.railway.app/analyze" \
+  -H "accept: application/json" \
+  -H "Content-Type: multipart/form-data" \
+  -F "file=@/path/to/test-image.jpg"
+```
+
+Or visit `https://your-app-name.up.railway.app` in your browser to use the web interface.
+
 ## Training Your Own Detector
 
 The app expects a YOLOv8 model trained on license plates. Here's how to create one:
